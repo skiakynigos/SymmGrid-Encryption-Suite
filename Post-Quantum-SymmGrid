@@ -13,12 +13,23 @@ The Shadow-Mirage Protocol is a novel, dynamic state metamorphic cryptographic a
 
 ## ⚙️ Core Algorithm Blueprint
 
-### Phase 1: Entropy Pooling & Chaos Generation
-**Objective:** Generate an unpredictable, hardware-derived state blueprint.
-* **Step 1.1:** System samples `Hardware_Voltage_Noise`.
-* **Step 1.2:** System samples `OS_Nanosecond_Timer`.
-* **Step 1.3:** System aggregates inputs to generate a transient `Live_Chaos_Seed`.
-* **Outcome:** A non-deterministic seed that dictates the physical memory behavior for the current execution cycle.
+### 🛡️ Phase 1: The Cryptographic Shadow Node (Core Engine)
+
+**Overview**
+The foundational building block of this architecture is the "Shadow Node," a self-defending memory structure designed to bait, detect, and neutralize unauthorized RAM scans. It abandons traditional OS memory allocation in favor of a Custom Memory Arena, fortified by military-grade cryptographic entropy.
+
+**Core Mechanisms**
+
+* **Dual-Pointer Honeypot Trap:** The system deploys two distinct pointers. The `fake_data_ptr` acts as a highly visible decoy, while the `real_data_ptr` securely holds the XOR-encrypted payload. 
+* **OS Bypass via Memory Arena:** To prevent the OS Heap Allocator from clustering the pointers predictably (Small-Bin allocation flaw), the node claims a massive 100KB contiguous memory block to act as its own battlefield.
+* **Cryptographic Spatial Fragmentation:** Utilizing the native Windows deep security API (`BCryptGenRandom`), the engine extracts true hardware entropy to calculate pointer indices. This forces a massive, mathematically unpredictable spatial gap (20,000 to 70,000 bytes) between the decoy and the vault, completely breaking spatial-proximity memory scans.
+* **Active Dependency Lock (Kill-Switch):** The architecture actively monitors the decoy pointer. Any unauthorized read attempt on the fake data instantly triggers a zeroization protocol (`\0`), destroying the actual payload in RAM before permanently severing the pointer link.
+
+**Technical Specifications**
+
+* **Entropy Source:** `BCryptGenRandom` (Immune to time-spoofing and PRNG compiler bugs).
+* **Memory Footprint:** 100KB Custom Arena per node.
+* **Protection Layers:** Metamorphic XOR Masking, Cold-Boot Protection, Execution Hooking Resistance, and Zero Memory Leaks upon destruction.
 
 ### Phase 2: Metamorphic Memory Allocation (The Mirage Effect)
 **Objective:** Mask the true data payload size and structure.
