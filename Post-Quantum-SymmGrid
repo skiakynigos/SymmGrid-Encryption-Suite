@@ -37,11 +37,35 @@ The foundational building block of this architecture is the "Shadow Node," a sel
 * **Step 2.2:** Using the `Live_Chaos_Seed`, dynamically allocate `Phantom_Nodes` (dummy structs) in heap memory.
 * **Step 2.3:** Expand the grid dimensions pseudo-randomly (e.g., `27x27` or `36x36`), seamlessly embedding actual data coordinates among the noise.
 
-### Phase 3: Identity Obfuscation (XOR Masking)
-**Objective:** Destroy frequency analysis vulnerabilities.
-* **Step 3.1:** Extract the plaintext data stream.
-* **Step 3.2:** Perform a bitwise XOR operation against a sub-stream derived from the `Live_Chaos_Seed`.
-* **Step 3.3:** Convert all recognizable characters into uniformly distributed ciphertext bytes.
+### ⚙️ Phase 3: Dynamic ARX Memory Transformation (Sub-Algorithm)
+
+**Overview:**
+Replacing traditional static XOR masking, this sub-algorithm operates directly on the raw memory addresses established by the ShadowNode Honeypot. It utilizes a Non-Linear ARX (Add-Rotate-XOR) sequence, driven by the Master Entropy Seed, to mutate data strictly in-place. This ensures maximum cryptographic diffusion while maintaining the structural integrity of the decoy pointers.
+
+**Execution Steps:**
+
+**Step 1: Secure Memory Dereferencing**
+* For each structural cell `[i][j]` within the Permuted Grid:
+  * Access the memory object: `ShadowNode* current_node = Grid[i][j]`.
+  * Validate integrity: Ensure `current_node->real_data_ptr != nullptr`. (If null, it indicates the Kill-Switch was triggered by a RAM scan; halt execution immediately).
+  * Extract the raw byte directly from the secure address: `Target_Byte = *(current_node->real_data_ptr)`.
+
+**Step 2: Dynamic Instruction Extraction**
+* Generate the `ARX_Instruction_Set` for the current cell using the Pseudo-Random state derived from the Hardware Master Seed.
+* Extract three unique dynamic variables: `Add_Val`, `Shift_Val` (0 to 7), and `Xor_Mask`.
+
+**Step 3: Non-Linear Mutation (ARX)**
+* **Addition (Confusion):** `Target_Byte = (Target_Byte + Add_Val) % 256` 
+  *(Generates cryptographic carry-bits).*
+* **Rotation (Diffusion):** `Target_Byte = (Target_Byte << Shift_Val) | (Target_Byte >> (8 - Shift_Val))` 
+  *(Performs a bitwise circular shift to scramble binary positioning).*
+* **XOR (Masking):** `Target_Byte = Target_Byte ^ Xor_Mask` 
+  *(Applies the final layer of algebraic masking).*
+
+**Step 4: In-Place Address Update (The Memory Anchor)**
+* Write the fully mutated `Target_Byte` back to its exact original address in the secure Arena.
+* `*(current_node->real_data_ptr) = Target_Byte`.
+* *Crucial mechanism:* The `fake_data_ptr` remains undisturbed at its separate offset, continuing to act as a live, active honeypot throughout the entire encryption cycle.
 
 ### Phase 4: Shadow-Trap Indirection (Dual-Pointer Mapping)
 **Objective:** Create active cryptographic honeypots within the memory state.
