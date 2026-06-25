@@ -13,49 +13,50 @@ The Shadow-Mirage Protocol is a novel, dynamic state metamorphic cryptographic a
 
 ## ⚙️ Core Algorithm Blueprint
 
-### 🛡️ Phase 1: The Cryptographic Shadow Node (Dual-Shadow Core Engine)
+### 🛑 Layer 0: Execution Integrity (The Security Guard)
+**Objective:** Validate the environment to prevent API Hooking and Instrumentation before any cryptographic material is generated.
+* **Step 0.1:** Execute internal thread-context checks and `IsDebuggerPresent()` to ensure no active RAM monitoring is occurring.
+* **Step 0.2:** Verify the memory address of the `BCryptGenRandom` API. If jump instructions (`JMP`) or foreign hooks are detected attempting to intercept the "Delivery Boy," trigger an immediate silent exit.
 
-**Overview**
+### 🛡️ Phase 1: The Cryptographic Shadow Node (Dual-Shadow Core Engine)
+**Overview:**
 The foundational building block of this architecture is the "Shadow Node," a self-defending memory structure designed to bait, detect, and neutralize unauthorized RAM scans. It abandons traditional OS memory allocation in favor of a Custom Memory Arena, fortified by military-grade cryptographic entropy. To eliminate "RAM Scraping" vulnerabilities, SymmGrid v2.0 implements a **Dual-Shadow Isolation Architecture**—deploying these nodes to protect not just the data payload, but also the ephemeral Master API Key (Seed).
 
-**Core Mechanisms**
-
+**Core Mechanisms:**
 * **Dual-Shadow Isolation:** The system initializes two parallel containment fields within the RAM arena. One Shadow Node secures the plaintext data, while the second acts as a "Vault-within-a-Vault," encapsulating the transient API Key governing the encryption logic.
 * **Dual-Pointer Honeypot Trap:** Inside each node, the system deploys two distinct pointers. The `fake_data_ptr` acts as a highly visible decoy, while the `real_data_ptr` securely holds the XOR-encrypted payload (or the Master Key). 
 * **OS Bypass via Memory Arena:** To prevent the OS Heap Allocator from clustering the pointers predictably (Small-Bin allocation flaw), the nodes claim a massive 100KB contiguous memory block to act as their own battlefield.
 * **Cryptographic Spatial Fragmentation:** Utilizing the native Windows deep security API (`BCryptGenRandom`), the engine extracts true hardware entropy to calculate pointer indices. This forces a massive, mathematically unpredictable spatial gap (20,000 to 70,000 bytes) between the decoy and the vault, completely breaking spatial-proximity memory scans.
 * **Active Dependency Lock & Secure Zeroization:** The architecture actively monitors the decoy pointers. Any unauthorized read attempt on the fake data instantly triggers a zeroization protocol. It physically overrides the actual payload and the Master API Key in RAM with Null Characters (`\0`), completely destroying the cryptographic trail before permanently severing the pointer link.
 
-**Technical Specifications**
-
+**Technical Specifications:**
 * **Entropy Source:** `BCryptGenRandom` (Immune to time-spoofing and PRNG compiler bugs).
 * **Memory Footprint:** 100KB Custom Arena per node.
 * **Protection Layers:** Metamorphic XOR Masking (Plan B Fallback), Cold-Boot Protection, Execution Hooking Resistance, and Micro-Lifespan Execution (Zero Memory Leaks).
 
-### Phase 2: Metamorphic Memory Allocation (The Mirage Effect)
+### 🌌 Phase 2: Metamorphic Memory Allocation (The Mirage Effect)
 **Objective:** Mask the true data payload size and structure.
 * **Step 2.1:** Initialize the base `9x9` recursive grid structure.
 * **Step 2.2:** Using the `Live_Chaos_Seed`, dynamically allocate `Phantom_Nodes` (dummy structs) in heap memory.
 * **Step 2.3:** Expand the grid dimensions pseudo-randomly (e.g., `27x27` or `36x36`), seamlessly embedding actual data coordinates among the noise.
 
 ### ⚙️ Phase 3: Dynamic ARX Memory Transformation (Sub-Algorithm)
-
 **Overview:**
 Replacing traditional static XOR masking, this sub-algorithm operates directly on the raw memory addresses established by the ShadowNode Honeypot. It utilizes a Non-Linear ARX (Add-Rotate-XOR) sequence, driven by the Master Entropy Seed, to mutate data strictly in-place. This ensures maximum cryptographic diffusion while maintaining the structural integrity of the decoy pointers.
 
 **Execution Steps:**
 
-**Step 1: Secure Memory Dereferencing**
+**Step 3.1: Secure Memory Dereferencing**
 * For each structural cell `[i][j]` within the Permuted Grid:
   * Access the memory object: `ShadowNode* current_node = Grid[i][j]`.
   * Validate integrity: Ensure `current_node->real_data_ptr != nullptr`. (If null, it indicates the Kill-Switch was triggered by a RAM scan; halt execution immediately).
   * Extract the raw byte directly from the secure address: `Target_Byte = *(current_node->real_data_ptr)`.
 
-**Step 2: Dynamic Instruction Extraction**
+**Step 3.2: Dynamic Instruction Extraction**
 * Generate the `ARX_Instruction_Set` for the current cell using the Pseudo-Random state derived from the Hardware Master Seed.
 * Extract three unique dynamic variables: `Add_Val`, `Shift_Val` (0 to 7), and `Xor_Mask`.
 
-**Step 3: Non-Linear Mutation (ARX)**
+**Step 3.3: Non-Linear Mutation (ARX)**
 * **Addition (Confusion):** `Target_Byte = (Target_Byte + Add_Val) % 256` 
   *(Generates cryptographic carry-bits).*
 * **Rotation (Diffusion):** `Target_Byte = (Target_Byte << Shift_Val) | (Target_Byte >> (8 - Shift_Val))` 
@@ -63,30 +64,29 @@ Replacing traditional static XOR masking, this sub-algorithm operates directly o
 * **XOR (Masking):** `Target_Byte = Target_Byte ^ Xor_Mask` 
   *(Applies the final layer of algebraic masking).*
 
-**Step 4: In-Place Address Update (The Memory Anchor)**
+**Step 3.4: In-Place Address Update (The Memory Anchor)**
 * Write the fully mutated `Target_Byte` back to its exact original address in the secure Arena.
 * `*(current_node->real_data_ptr) = Target_Byte`.
 * *Crucial mechanism:* The `fake_data_ptr` remains undisturbed at its separate offset, continuing to act as a live, active honeypot throughout the entire encryption cycle.
 
-### Phase 4: Shadow-Trap Indirection (Dual-Pointer Mapping)
-**Objective:** Create active cryptographic honeypots within the memory state.
+### 🕸️ Phase 4: Shadow-Trap Indirection (Dual-Pointer Mapping)
+**Objective:** Create active cryptographic honeypots within the memory state and enforce strict micro-lifespans.
 * **Step 4.1:** For every encrypted byte, instantiate two pointers:
   * `Fake_Ptr` (Decoy): Points to heavily encrypted garbage data, visibly exposed to memory scanners.
   * `Real_Ptr` (Vault): Points to the actual XOR'ed payload.
-* **Step 4.2:** **Dependency Lock:** `Real_Ptr` remains unresolved/null until the algorithm strictly validates the internal execution state. Unauthorized forced access to `Fake_Ptr` triggers a localized memory wipe (Kill-Switch).
+* **Step 4.2: Dependency Lock & Zeroization Exit:** `Real_Ptr` remains unresolved/null until the algorithm strictly validates the internal execution state. Unauthorized forced access to `Fake_Ptr` triggers the localized `\0` override wipe (Kill-Switch). Once encryption concludes, the destructor cleanly wipes all physical memory states.
 
-### Phase 5: The SymmGrid Spatial Shuffle
+### 🔀 Phase 5: The SymmGrid Spatial Shuffle
 **Objective:** Execute high-speed spatial transposition.
 * **Step 5.1:** Apply the core `3x3` recursive transposition logic across the expanded Mirage Grid.
-* **Step 5.2:** Shuffle the pointer addresses rather than the underlying data, achieving O(n) speed while mathematically dispersing the pointer map.
+* **Step 5.2:** Shuffle the pointer addresses rather than the underlying data, achieving O(n) speed while mathematically dispersing the pointer map and ensuring physical RAM addresses remain stable to prevent segmentation faults.
 
-### Phase 6: Post-Quantum Synchronization (The Chaos-Capsule)
+### ⏳ Phase 6: Post-Quantum Synchronization (The Chaos-Capsule)
 **Objective:** Securely synchronize the sender and receiver without transmitting static keys.
 * **Step 6.1:** Compile the pointer transposition paths and the `Live_Chaos_Seed` logic into a lightweight metadata object (`Chaos_Capsule`).
 * **Step 6.2:** Encapsulate the `Chaos_Capsule` using a Post-Quantum Key Encapsulation Mechanism (e.g., CRYSTALS-Kyber).
 * **Step 6.3:** Transmit the locked `Chaos_Capsule` alongside the mutating Mirage Grid to the receiver.
 * **Step 6.4:** The receiver unlocks the capsule via their private key, perfectly mirroring the sender's memory state and resolving the `Real_Ptr` paths to decrypt the payload.
-
 ---
 
 > **Note:** This architecture relies heavily on physical memory manipulation and pointer arithmetic. Strict memory profiling is required to prevent segmentation faults during the Mirage expansion phase.
